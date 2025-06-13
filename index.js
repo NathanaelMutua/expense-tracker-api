@@ -27,7 +27,7 @@ app.post("/expenses", async (req,res) => {
 		console.log(e);
 		res.status(400).json({ message: "Something Went Wrong!" })
 	}
-})
+});
 
 // my get request to get all expense records
 app.get("/expenses", async (_req, res) => {
@@ -39,9 +39,9 @@ app.get("/expenses", async (_req, res) => {
 		})
 		res.status(200).json({ message: "Retrieved All The Expense Records", expenseData })
 	} catch (e) {
-		res.status(400).json({ message: "Something Went Wrong" })
+		res.status(400).json({ message: "Something Went Wrong!" })
 	}
-})
+});
 
 // My get request to query a specific expense based on the id of the expense
 app.get("/expenses/:id", async (req, res) => {
@@ -54,9 +54,31 @@ app.get("/expenses/:id", async (req, res) => {
 		})
 		res.status(200).json({ message: "Specific Expense Has Been Retrieved", specificExpense })
 	} catch (e) {
-		res.status(404).json({ message: "Unfortunately, user NOT found!" })
+		res.status(404).json({ message: "Something Went Wrong!" })
 	}
-})	
+});
+
+
+// Below is my endpoint to update an expense using PATCH request and update() method
+app.patch("/expenses/:id", async (req, res) => {
+	try{
+		const { id } = req.params;
+		const { amount, description, category } = req.body;
+		const updatedExpense = await myPrisma.expenses.update({
+		where: {
+			id
+		}, data: {
+			amount,
+			description,
+			category
+		}
+		})
+		res.status(200).json({ message: "Expense Updated Successfully", updatedExpense })
+	} catch (e) {
+		res.status(400).json({ message: "Something Went Wrong!!" })
+		console.log(e); //we will output the error just so we can troubleshoot the problem, incase it occurs
+	}
+})
 
 // My port apparatus starts here
 // This is where the server will be listening on

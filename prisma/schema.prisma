@@ -20,5 +20,6 @@ model expenses{
   category    String ? @map("expense_category")
   date        DateTime @default(now()) @map("date_filed")
   createdAt   DateTime @default(now()) @map("expense_creation_time")
+  updatedAt   DateTime ? @updatedAt @map("expense_update_time")
   isDeleted   Boolean @default(false) @map("is_deleted")
 }

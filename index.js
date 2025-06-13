@@ -22,12 +22,26 @@ app.post("/expenses", async (req,res) => {
 				category
 			}
 		})
-		res.status(202).json({message: "New Expense added successfully", success: true, newExpense })
+		res.status(201).json({message: "New Expense added successfully", newExpense }) // updated the status code to 201 from 202
 	} catch (e) {
 		console.log(e);
 		res.status(400).json({ message: "Something Went Wrong!" })
 	}
 })
+
+// my get request to get all expense records
+app.get("/expenses", async (_req, res) => {
+		 try {
+			 const expenseData = await myPrisma.expenses.findMany({
+				 where: {
+					 isDeleted: false
+				 }
+			 })
+			 res.status(200).json({ message: "Retrieved All The Expense Records", expenseData })
+		 } catch (e) {
+			 res.status(400).json({ message: "Something Went Wrong" })
+		 }
+	 })
 
 // My port apparatus starts here
 // This is where the server will be listening on

@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/NathanaelMutua/expense-tracker-api/issues"
   },
-  "homepage": "https://github.com/NathanaelMutua/expense-tracker-api#readme"
+  "homepage": "https://github.com/NathanaelMutua/expense-tracker-api#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }

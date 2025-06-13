@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/NathanaelMutua/expense-tracker-api#readme",
   "dependencies": {
-    "express": "^5.1.0"
+    "@prisma/client": "^6.9.0",
+    "express": "^5.1.0",
+    "prisma": "^6.9.0"
   }
 }

@@ -31,17 +31,32 @@ app.post("/expenses", async (req,res) => {
 
 // my get request to get all expense records
 app.get("/expenses", async (_req, res) => {
-		 try {
-			 const expenseData = await myPrisma.expenses.findMany({
-				 where: {
-					 isDeleted: false
-				 }
-			 })
-			 res.status(200).json({ message: "Retrieved All The Expense Records", expenseData })
-		 } catch (e) {
-			 res.status(400).json({ message: "Something Went Wrong" })
-		 }
-	 })
+	try {
+		const expenseData = await myPrisma.expenses.findMany({
+			where: {
+				isDeleted: false //this will get all the expenses that have not undergone soft deletion
+			}
+		})
+		res.status(200).json({ message: "Retrieved All The Expense Records", expenseData })
+	} catch (e) {
+		res.status(400).json({ message: "Something Went Wrong" })
+	}
+})
+
+// My get request to query a specific expense based on the id of the expense
+app.get("/expenses/:id", async (req, res) => {
+	try{
+		const { id } = req.params;
+		const specificExpense = await myPrisma.expenses.findFirst({
+			where: {
+				id // we don't need to specify the value as it is the same as the
+			}
+		})
+		res.status(200).json({ message: "Specific Expense Has Been Retrieved", specificExpense })
+	} catch (e) {
+		res.status(404).json({ message: "Unfortunately, user NOT found!" })
+	}
+})	
 
 // My port apparatus starts here
 // This is where the server will be listening on

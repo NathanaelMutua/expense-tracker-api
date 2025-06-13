@@ -17,7 +17,8 @@ model expenses{
   id          String @id @default(uuid())
   amount      Int @map("expense_amount")
   description String @map("expense_description")
-  category    String @map("expense_category")
+  category    String ? @map("expense_category")
   date        DateTime @default(now()) @map("date_filed")
   createdAt   DateTime @default(now()) @map("expense_creation_time")
+  isDeleted   Boolean @default(false) @map("is_deleted")
 }

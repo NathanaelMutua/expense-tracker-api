@@ -112,6 +112,23 @@ app.delete("/expenses/:id", async (req, res) => {
   }
 });
 
+// below is a get request where we will request for the sum of all amount values in the databas
+// app.get("/expenses/summary", async (req, res) => {
+// 	try{
+// 		const sumedExpenses = await myPrisma.expenses.aggregate({
+// 			where: {
+// 				isDeleted: false
+// 			}, _sum: {
+// 				amount: true
+// 			}
+// 		})
+//     res.status(200).json({ message: "Sum of All Expenses Extracted", sum: sumedExpenses._sum.amount })
+// 	} catch (e) {
+// 		res.status(400).json({ message: "Something Went Wrong!" })
+// 		console.log(e); //we will output the error just so we can troubleshoot the problem, incase it occurs
+// 	}
+// });
+
 // My port apparatus starts here
 // This is where the server will be listening on
 const port = 7070;

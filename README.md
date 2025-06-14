@@ -1,364 +1,390 @@
-# API Creation With Node.JS and Express.JS and Prisma(PostgreSQL)
+# Backend Development Practice: Expense Tracker API
 
-## **Description**
+## Description
 
-I formatted my project into a question, you can follow along with me as we create it together.
-
----
-
-## **Backend Development Practice Question**
-
-**Task:** Implement an Expense Tracker API with Node.js / Express and Prisma
-
-**Requirements:**
-
-1. **Data Model**
-
-   - Create a Prisma model for expenses with:
-     - `amount` (float, required)
-     - `description` (string, required)
-     - `category` (string, optional)
-     - Automatic `createdAt` timestamp
-
-2. **Core Functionality**
-
-   - `POST /expenses`
-     - Validate that amount is positive
-     - Return 400 error for invalid data
-   - `GET /expenses`
-     - Add query parameters for filtering by `category` and `minAmount`
-
-3. **Advanced Feature**
-
-   - Implement `GET /expenses/summary` that returns:
-     - Total sum of all expenses
-     - Sum grouped by category
-
-**Deliverables:**
-
-1. Complete `schema.prisma` file
-2. Express route implementations
-3. Example curl commands to test endpoints / postman
+I formatted my API creation project into a question, you can follow along with me as we create it together.
 
 ---
 
-### **My Thoughts and Work Arounds**
+## Requirements
 
-1. Created a new directory: [expenses-tracker]("C:\Users\ADMIN\Documents\PROGRAMMING\projects\expense-tracker")
-2. Created a new repo: [expense-tracker-api](https://github.com/NathanaelMutua/expense-tracker-api.git)
+Find the question in this document, [question.md](./question.md)
 
-3. You can also find my postman work space [right here](https://nathanael-7604382.postman.co/workspace/Nathanael's-Workspace~5b4242d0-11c7-4277-809b-10ca424c98a5/collection/45838328-0e7372c0-3d32-453d-9e49-1ee98759cd5d?action=share&creator=45838328)
+---
 
-4. Initialize a git repo in the directory:
+## Table of Contents
 
-   ```bash
-   git init
-   ```
+1. [Description](#description)
+2. [Requirements](#requirements)
+3. [Implementation Steps](#implementation-steps)
+   1. [Project Setup](#1-project-setup)
+   2. [Version Control](#2-version-control)
+   3. [Node.js Setup](#3-nodejs-setup)
+   4. [Dependencies Installation](#4-dependencies-installation)
+   5. [Database Configuration](#5-database-configuration)
+   6. [Prisma Schema](#6-prisma-schema)
+   7. [Migration](#7-migration)
+   8. [Package.json Configuration](#8-packagejson-configuration)
+   9. [Generate Prisma Client](#9-generate-prisma-client)
+4. [API Implementation](#api-implementation)
+   1. [Server Setup](#1-server-setup)
+   2. [CRUD Endpoints](#2-crud-endpoints)
+      1. [POST /expenses](#post-expenses)
+      2. [GET /expenses](#get-expenses)
+      3. [GET /expenses/:id](#get-expensesid)
+      4. [PATCH /expenses/:id](#patch-expenses-id)
+      5. [DELETE /expenses/:id](#delete-expensesid)
+      6. [GET /expenses/summary](#get-expensessummary)
+      7. [GET /expenses/report](#get-expensesreport)
+5. [Test Data](#test-data)
+6. [Endpoint Summary](#endpoint-summary)
 
-5. Link GitHub repo to local file:
+---
 
-   ```bash
-   git remote add origin https://github.com/NathanaelMutua/expense-tracker-api.git
-   ```
+## Implementation Steps
 
-6. Check if GitHub repo is connected:
+### 1. Project Setup
 
-   ```bash
-   git remote -v
-   ```
+1. Created a directory: `expenses-tracker` to hold our project files.
+2. Created repository: [expense-tracker-api](https://github.com/NathanaelMutua/expense-tracker-api.git)
+3. You can find my Postman workspace here: [Nathanael's Workspace](https://nathanael-7604382.postman.co/workspace/Nathanael's-Workspace~5b4242d0-11c7-4277-809b-10ca424c98a5/collection/45838328-0e7372c0-3d32-453d-9e49-1ee98759cd5d?action=share&creator=45838328)
 
-   - This should return the fetch and push URLs
+### 2. Version Control
 
-7. Initialize a Node.js project, by adding a `package.json` file to your workspace.
+Initialized and setup my Github repository
 
-   ```bash
-   npm init -y
-   ```
+```bash
+git init
+git remote add origin https://github.com/NathanaelMutua/expense-tracker-api.git
+git remote -v
+```
 
-8. Install all the necessary dependencies:
+### 3. Node.js Setup
 
-9. Express `npm install express`
+initialized Node.js to have my package.json file in the directory.
 
-10. Prisma `npm install prisma --save`
+```bash
+npm init -y
+```
 
-    - I realized, that when I installed Prisma as a development dependency(`npm install prisma --save-dev`) it failed in deployment on Render, But I will come back to this.
+### 4. Dependencies Installation
 
-    > NOTE: we will review the dependencies on deployment and REMEMBER to carry out the installation, generation and instantiation of the client.
+```bash
+npm install express
+npm install prisma --save
+npx prisma init
+npm install @prisma/client
+```
 
-11. Initialize Prisma schema `npx prisma init`, this creates a new directory `Prisma` that contains `prisma.schema` and `.env` file.
-12. Prisma Client `npm install @prisma\client` - We will review this process when we are done setting up our database.
-13. Add `index.js` file to the main directory to hold logic.
-14. Modify the `.env` file to have the correct database variable to my PostgreSQL
+### 5. Database Configuration
 
-    ```sql
-    DATABASE_URL = "postgresql://postgres:mypassword123@localhost:5432/expensesDB"
-    ```
-
-15. Modify `prisma.schema` to have our model.
-    You can refer to the [Prisma Notes]([Models | Prisma](https://prisma-basics-notes.vercel.app/models.html#field-types))
-    A model field has the syntax: fieldName datatype fieldTypeModifier Attributes
-    The fields we need for this data base are...id, amount, description, category, date and createdAt
+In the `.env` file we will update the details as follows:
 
 ```sql
-model expenses{
+DATABASE_URL="postgresql://postgres:mypassword123@localhost:5432/expensesDB"
+```
 
-  id          String @id @default(uuid())
+![NOTE]
+> We will revisit this environment variable to update it to the deployed database.
 
-  amount      Int @map("expense_amount")
+### 6. Prisma Schema
 
-  description String @map("expense_description")
+In our `schema.prisma` file we will create our model:
 
-  category    String @map("expense_category")
-
-  date        DateTime @default(now()) @map("date_filed")
-
-  createdAt   DateTime @default(now()) @map("expense_creation_time")
-
+```prisma
+model expenses {
+  id          String   @id @default(uuid())
+  amount      Int      @map("expense_amount")
+  description String   @map("expense_description")
+  category    String?  @map("expense_category")
+  date        DateTime @default(now()) @map("date_filed")
+  createdAt   DateTime @default(now()) @map("expense_creation_time")
+  updatedAt   DateTime? @updatedAt @map("expense_update_time")
+  isDeleted   Boolean  @default(false) @map("is_deleted")
 }
 ```
 
-16. Make my first migration of the model
+### 7. Migration
+
+We will now migrate our model to create the table in our database.
 
 ```bash
-npx prisma migrate dev --name "add the expense migration"
+npx prisma migrate dev --name "add_the_expense_migration"
 ```
 
-![Running \l and \c to see the model in the CLI](C:\Users\ADMIN\Pictures\Screenshots\Screenshot 2025-06-13 141617.png)
+### 8. Package.json Configuration
 
-17. Make adjustments to my package.json file for compatibility and added ease of use.
-
-- Add `"type": "module",`
-- Add
+We will add a few scripts to streamline our development
 
 ```json
-...
-"format": "prettier --write .",
-
-    "dev": "node --watch index.js",
-
-    "prod": "node index.js"
-...
-```
-
-18. Let's revisit the Prisma Client. Let's generate it as follows: `npx prisma generate`
-
-19. Great, now let's dive into our index.js logic. First let's make all our necessary imports and initialization:
-
-```js
-import express from "express"; // getting all libraries for express - will help in creating a server and routing
-import { PrismaClient } from "@prisma/client"; // helps us interact with the database
-
-const app = express(); //initialize the express.js app
-const myPrisma = new PrismaClient(); //creates new client instance
-```
-
-20. Starting the CRUD operations
-
-1.  Create: we will use POST request
-
-```js
-app.post("/expenses", (req,res) => {
- const {amount, description, category} = req.body; // this gets the data I will input into postman
- if (amount < 0){
-  return res.status(400).json({ message: "Amount is a negative value" })
- }
- const newExpense = await prisma.expenses.create({
-  data: {
-   amount,
-   description,
-   category
+{
+  "type": "module",
+  "scripts": {
+    "format": "prettier --write .",
+    "dev": "node --watch index.js",
+    "prod": "node index.js"
   }
- })
- res.status(202).json({message: "New Expense added successfully", success: true, newExpense })
-})
+}
 ```
 
-- Let's break down my POST request:
+### 9. Generate Prisma Client
 
-- "/expenses" is the endpoint
-- req is a request for information that is passed as a parameter.
-- we use async await as this is a function/action that has a promise.
-- we assign the values: amount, description, and category to their exact variable names, by placing them in an object referring to the body of the request, which we will add data for in postman, to test the result.
-- we now run an if condition to check if the value is negative, which as per the requirements, it shouldn't be.
-- if the number is not negative, we now create our newExpense, by passing the values from the body as data
-- we output a result that contains a success message and the created data.
-- Let's implement a try-catch block:
+We will generate our client to allow us to communicate with our database.
 
-  ```js
-  app.post("/expenses", async (req, res) => {
-    try {
-      const { amount, description, category } = req.body; // this gets the data I will input into postman
-      if (amount < 0) {
-        return res.status(400).json({ message: "Amount is a negative value" });
-      }
-      const newExpense = await myPrisma.expenses.create({
-        data: {
-          amount,
-          description,
-          category,
-        },
-      });
-      res
-        .status(201)
-        .json({
-          message: "New Expense added successfully",
-          success: true,
-          newExpense,
-        });
-    } catch (e) {
-      res.status(400).json({ message: "Something Went Wrong!" });
-      console.log(e); //we will output the error just so we can troubleshoot the problem, incase it occurs
+```bash
+npx prisma generate
+```
+
+---
+
+## API Implementation
+
+### 1. Server Setup
+
+`index.js`:
+
+```js
+import express from 'express';
+import { PrismaClient } from '@prisma/client';
+
+const app = express();
+const myPrisma = new PrismaClient();
+```
+
+### 2. CRUD Endpoints
+
+#### POST /expenses
+
+This will create a new request from the request body content.
+
+```js
+app.post("/expenses", async (req, res) => {
+  try {
+    const { amount, description, category } = req.body; //gets the data we enter into postman
+    if (amount < 0) {
+      return res.status(400).json({ message: "Amount is a negative value" });
     }
-  });
-  ```
-
-- Great, we'll commit this and move onto the next feature.
-
-- To get know-how of the status codes we can look into them [on this site by MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status).
-- 201 - new resource created
-- 200 - okay
-- 400 - bad request
-- 404 - not found
-- 500 - Internal server error
-- By the way, here is the code I am entering into my postman body:
-
-  ```json
-  {
-      "amount": {{$randomInt}},
-      "description": "{{$randomLoremSentence}}",
-      "category": "{{$randomAdjective}}"
+    const newExpense = await myPrisma.expenses.create({
+      data: { amount, description, category }
+    });
+    res.status(201).json({
+      message: "New Expense added successfully", 
+      newExpense
+    });
+  } catch (e) {
+    res.status(400).json({ message: "Something Went Wrong!" });
+    console.log(e);
   }
-  ```
+});
+```
 
-22. Getting all expenses:
+#### GET /expenses
 
-- We will create a GET request and use the findMany() method.
-- PS...I added the `isDeleted` field to my model for soft deletion.
+This will retrieve all the expenses from the database.
 
 ```js
 app.get("/expenses", async (_req, res) => {
   try {
     const data = await myPrisma.expenses.findMany({
-      where: {
-        isDeleted: { eauqls: false },
-      },
+      where: { isDeleted: { equals: false } }
     });
-    res
-      .status(200)
-      .json({ message: "Retrieved All The Expense Records", data });
+    res.status(200).json({
+      message: "Retrieved All The Expense Records",
+      data
+    });
   } catch (e) {
     res.status(400).json({ message: "Something Went Wrong" });
-    console.log(e); //we will output the error just so we can troubleshoot the problem, incase it occurs
+    console.log(e);
   }
 });
 ```
 
-- You also might be wondering what the `_req` means, right? So, because we're not making a request in this block of code, however, the request parameter is needed for the response parameter to function properly, to prevent unused code we place an underscore before the `req` parameter.
+#### GET /expenses/:id
 
-23. Getting a specific expense,
-
-- Here we will use the req.params to access the route parameter passed in the endpoint, this will be the specific expense ID.
-- Here is the code:
+This will find the first value(because the ID is unique, it's only one value) that meets the parameter value entered.
 
 ```js
 app.get("/expenses/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const specificExpense = await myPrisma.expenses.findFirst({
-      where: {
-        id, // we don't need to specify the value as it is the same as the
-      },
+      where: { id }
     });
-    res
-      .status(200)
-      .json({
-        message: "Specific Expense Has Been Retrieved",
-        specificExpense,
-      });
+    res.status(200).json({
+      message: "Specific Expense Has Been Retrieved",
+      specificExpense
+    });
   } catch (e) {
     res.status(404).json({ message: "Something Went Wrong!" });
-    console.log(e); //we will output the error just so we can troubleshoot the problem, incase it occurs
+    console.log(e);
   }
 });
 ```
 
-- Note that in the function above we want to find the specific ID using a find method. There are 3 main find methods:
+#### PATCH /expenses/:id
 
-- **findUnique()**: this is used to retrieve a single record based on a unique identifier or id. (I think this would be a better alternative for what we have used).
-- **findMany()**: this usually queries all the records in the model.
-- **findFirst()**: returns the first record that meets certain criteria.
+Will update a specific expense, with data from the request body.
 
-24. Updating an Expense record:
+```js
+app.patch("/expenses/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount, description, category } = req.body;
+    const updatedExpense = await myPrisma.expenses.update({
+      where: { id },
+      data: { amount, description, category }
+    });
+    res.status(200).json({
+      message: "Expense Updated Successfully",
+      updatedExpense
+    });
+  } catch (e) {
+    res.status(400).json({ message: "Something Went Wrong!!" });
+    console.log(e);
+  }
+});
+```
 
-- To carry this out, we will make a PATCH request with the update method, and it will be similar to getting a specific request, however, this time we will also be passing a value/data.
-- Note that the difference between PUT and PATCH is that PUT updates the whole resource, and will require us to include all the information for the resource, however, PATCH updates whatever we specify ONLY.
-- Note: I added the `updatedAt` field to my model in the `schema.prisma` file and made migrations. This will tell us when a record was updated.
+#### DELETE /expenses/:id
 
-  ```js
-  app.patch("/expenses/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { amount, description, category } = req.body;
-      const updatedExpense = await myPrisma.expenses.update({
-        _sum: {
-          amount: true,
-        },
-      });
-      res
-        .status(200)
-        .json({ message: "Expense Updated Successfully", updatedExpense });
-    } catch (e) {
-      res.status(400).json({ message: "Something Went Wrong!!" });
-      console.log(e); //we will output the error just so we can troubleshoot the problem, incase it occurs
-    }
-  });
-  ```
-
-25. Deleting an Expense.
-
-- We will instantiate soft deletion, where we don't actually delete the record, but change the state of `isdeleted` field to `true` to have it as deleted.
-- This is a key practice as data is very important and can and will be required for analysis and other important purposes.
+Will perform a soft-delete on an expense record, by updating the `isDeleted` field to `true`.
 
 ```js
 app.delete("/expenses/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const deletedExpense = await myPrisma.expenses.update({
-      where: {
-        id,
-      },
-      data: {
-        isDeleted: true,
-      },
+      where: { id },
+      data: { isDeleted: true }
     });
-    res
-      .status(200)
-      .json({ message: "Expense Record Deleted Successfully", deletedExpense });
+    res.status(200).json({
+      message: "Expense Record Deleted Successfully",
+      deletedExpense
+    });
   } catch (e) {
     res.status(404).json({ message: "Something Went Wrong!" });
-    console.log(e); //we will output the error just so we can troubleshoot the problem, incase it occurs
+    console.log(e);
   }
 });
 ```
 
-26. Getting the sum of expenses:
+#### GET /expenses/summary
 
-- we will use the method aggregate.() on our amount field to get the sum.
-- we will first ensure that we are carrying this out on records where the 'isDeleted' field is false.
+This request will appear before the `app.get("/expenses/:id", async (_req, res)...` function, because as I have come to realize, specific get requests should come before dynamic requests.
+
+The request will give us the total sum of all expenses, and also the total for each category.
 
 ```js
 app.get("/expenses/summary", async (req, res) => {
- try{
-  const sumedExpenses = await myPrisma.expenses.aggregate({
-   where: {
-    isDeleted: false
-   }, _sum: {
-    amount: true
-   }
-  })
-  res.status(200).json({ message: "Sum of All Expenses Extracted", aggregation._sum.amount})
- } catch (e) {
-  res.status(400).json({ message: "Something Went Wrong!" })
- }
+  try {
+    const summedExpenses = await myPrisma.expenses.aggregate({
+      where: { isDeleted: false },
+      _sum: { amount: true }
+    });
+    
+    const sum = summedExpenses._sum.amount;
+
+    const summedCategories = await myPrisma.expenses.groupBy({
+      by: ['category'],
+      where: { isDeleted: false },
+      _sum: { amount: true }
+    });
+    
+    res.status(200).json({
+      message: "Sum of All Expenses Extracted",
+      sum_of_all_expenses: sum,
+      sum_by_category: summedCategories
+    });
+  } catch (e) {
+    res.status(400).json({ message: "Something Went Wrong!" });
+  }
 });
 ```
+
+#### GET /expenses/report
+
+Will give us the sum of a specific category.
+
+This block will use the query parameters passed in the URL.
+
+We will also use the groupBy() method, you can read more on aggregation, summary and grouping from the [prisma documentation](https://www.prisma.io/docs/orm/prisma-client/queries/aggregation-grouping-summarizing).
+
+```js
+app.get("/expenses/report", async (req, res) => {
+  try {
+    const categoryGroup = req.query.category;
+    const minAmount = Number(req.query.minAmount);
+    
+    const summarizedExpenses = await myPrisma.expenses.groupBy({
+      by: ['category'],
+      where: {
+        isDeleted: false,
+        category: { equals: categoryGroup },
+        amount: { gte: minAmount }
+      },
+      _sum: { amount: true }
+    });
+    
+    res.status(200).json({
+      message: `Retrieved Sum of Expenses in category '${categoryGroup}'`,
+      summarizedExpenses
+    });
+  } catch (e) {
+    res.status(400).json({ message: "Something Went Wrong!" });
+    console.log(e);
+  }
+});
+```
+
+---
+
+## Test Data
+
+Here's what I initially entered into Postman
+
+```json
+[
+  {
+    "amount": 1000,
+    "description": "Subscribed to a new software service",
+    "category": "tech"
+  },
+  {
+    "amount": 800,
+    "description": "Bought a new headset",
+    "category": "tech"
+  },
+  {
+    "amount": 500,
+    "description": "Bought lettuce from the shop",
+    "category": "groceries"
+  },
+  {
+    "amount": 100,
+    "description": "Bought bread from the bakery",
+    "category": "groceries"
+  },
+  {
+    "amount": 10000,
+    "description": "Paid rent for the month",
+    "category": "bills"
+  },
+  {
+    "amount": 900,
+    "description": "Paid the water bill for the month",
+    "category": "bills"
+  }
+]
+```
+
+---
+
+## Endpoint Summary
+
+1. `POST /expenses` - Create new expense
+2. `GET /expenses` - Retrieve all expenses
+3. `GET /expenses/report` - Get expenses by category with min amount filter
+4. `GET /expenses/summary` - Get total sum and category sums
+5. `GET /expenses/:id` - Get specific expense
+6. `PATCH /expenses/:id` - Update expense
+7. `DELETE /expenses/:id` - Soft delete expense

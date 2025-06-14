@@ -51,9 +51,9 @@ app.get("/expenses", async (_req, res) => {
 app.get("/expenses/summary", async (req, res) => {
   try {
     const summedExpenses = await myPrisma.expenses.aggregate({
-      where: {
-        isDeleted: false,
-      },
+      // where: {
+      //   isDeleted: false,
+      // },
       _sum: {
         amount: true,
       },

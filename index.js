@@ -20,7 +20,7 @@ app.post("/expenses", async (req, res) => {
         amount,
         description,
         category,
-      },
+      }
     });
     res
       .status(201)
@@ -51,21 +51,55 @@ app.get("/expenses", async (_req, res) => {
 app.get("/expenses/summary", async (req, res) => {
   try {
     const summedExpenses = await myPrisma.expenses.aggregate({
-      // where: {
-      //   isDeleted: false,
-      // },
+      where: {
+        isDeleted: false,
+      },
       _sum: {
         amount: true,
       },
     });
     const sum = summedExpenses._sum.amount;
+
+    // now we will add a variable to hold the categorized sums
+    const summedCategories = await myPrisma.expenses.groupBy({
+      by: ['category'],
+      where: {
+        isDeleted: false,
+      }, _sum: {
+        amount: true
+      }
+    });
+
     res
       .status(200)
-      .json({ message: "Sum of All Expenses Extracted Successfully", sum });
+      .json({ message: "Sum of All Expenses Extracted Successfully", total: sum, summedCategories});
   } catch (e) {
     res.status(400).json({ message: "Something Went Wrong!" });
     console.log(e); //we will output the error just so we can troubleshoot the problem, incase it occurs
   }
+});
+
+app.get("/expenses/report", async (req, res) => {
+    try{
+      // it is not standard to use req.body with a GET request, instead we use req.query
+      const categoryGroup = req.query.category; //we will pass the category as a key-value in the URL
+      const minAmount = Number(req.query.minAmount); // passed in URL
+      
+      const summarizedExpenses = await myPrisma.expenses.groupBy({
+      by: [ 'category' ],
+      where: {
+        isDeleted: false,
+        category: { equals: categoryGroup },
+        amount: { gte: minAmount }
+      }, _sum: {
+        amount: true
+      }
+      })
+      res.status(200).json({ message: `Retrieved Sum of Expenses in category '${categoryGroup}'`, summarizedExpenses })
+    } catch (e) {
+      res.status(400).json({ message: "Something Went Wrong!" });
+      console.log(e);
+    }
 });
 
 // My get request to query a specific expense based on the id of the expense

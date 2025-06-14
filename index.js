@@ -47,6 +47,27 @@ app.get("/expenses", async (_req, res) => {
   }
 });
 
+// below is a get request where we will request for the sum of all amount values in the database
+app.get("/expenses/summary", async (req, res) => {
+  try {
+    const summedExpenses = await myPrisma.expenses.aggregate({
+      where: {
+        isDeleted: false,
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+    const sum = summedExpenses._sum.amount;
+    res
+      .status(200)
+      .json({ message: "Sum of All Expenses Extracted Successfully", sum });
+  } catch (e) {
+    res.status(400).json({ message: "Something Went Wrong!" });
+    console.log(e); //we will output the error just so we can troubleshoot the problem, incase it occurs
+  }
+});
+
 // My get request to query a specific expense based on the id of the expense
 app.get("/expenses/:id", async (req, res) => {
   try {
@@ -56,12 +77,10 @@ app.get("/expenses/:id", async (req, res) => {
         id, // we don't need to specify the value as it is the same as the
       },
     });
-    res
-      .status(200)
-      .json({
-        message: "Specific Expense Has Been Retrieved",
-        specificExpense,
-      });
+    res.status(200).json({
+      message: "Specific Expense Has Been Retrieved",
+      specificExpense,
+    });
   } catch (e) {
     res.status(404).json({ message: "Something Went Wrong!" });
   }
@@ -111,23 +130,6 @@ app.delete("/expenses/:id", async (req, res) => {
     console.log(e); //we will output the error just so we can troubleshoot the problem, incase it occurs
   }
 });
-
-// below is a get request where we will request for the sum of all amount values in the databas
-// app.get("/expenses/summary", async (req, res) => {
-// 	try{
-// 		const sumedExpenses = await myPrisma.expenses.aggregate({
-// 			where: {
-// 				isDeleted: false
-// 			}, _sum: {
-// 				amount: true
-// 			}
-// 		})
-//     res.status(200).json({ message: "Sum of All Expenses Extracted", sum: sumedExpenses._sum.amount })
-// 	} catch (e) {
-// 		res.status(400).json({ message: "Something Went Wrong!" })
-// 		console.log(e); //we will output the error just so we can troubleshoot the problem, incase it occurs
-// 	}
-// });
 
 // My port apparatus starts here
 // This is where the server will be listening on

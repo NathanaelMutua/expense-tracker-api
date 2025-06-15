@@ -84,7 +84,6 @@ In the `.env` file we will update the details as follows:
 DATABASE_URL="postgresql://postgres:YOURPASSWORD@localhost:5432/DATABASE_NAME"
 ```
 
-![NOTE]
 > We will revisit this environment variable to update it to the deployed database.
 
 ### 6. Prisma Schema

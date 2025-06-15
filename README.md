@@ -81,7 +81,7 @@ npm install @prisma/client
 In the `.env` file we will update the details as follows:
 
 ```sql
-DATABASE_URL="postgresql://postgres:mypassword123@localhost:5432/expensesDB"
+DATABASE_URL="postgresql://postgres:YOURPASSWORD@localhost:5432/DATABASE_NAME"
 ```
 
 ![NOTE]
